@@ -1,0 +1,42 @@
+[gd_scene load_steps=3 format=3 uid="uid://dqs83jfyuvrkd"]
+
+[ext_resource type="PackedScene" uid="uid://fgx3msmlceof" path="res://scenes/clock.tscn" id="1_15c5l"]
+[ext_resource type="Script" path="res://scripts/test.gd" id="1_miv5m"]
+
+[node name="Test" type="Node2D"]
+scale = Vector2(2, 2)
+script = ExtResource("1_miv5m")
+
+[node name="Clock" parent="." instance=ExtResource("1_15c5l")]
+offset_left = 64.0
+offset_top = 64.0
+offset_right = 512.0
+offset_bottom = 608.0
+
+[node name="Button" type="Button" parent="."]
+offset_left = 672.0
+offset_top = 64.0
+offset_right = 800.0
+offset_bottom = 128.0
+toggle_mode = true
+text = "no number"
+
+[node name="Button2" type="Button" parent="."]
+offset_left = 736.0
+offset_top = 160.0
+offset_right = 911.0
+offset_bottom = 224.0
+toggle_mode = true
+text = "no number and lower"
+
+[node name="Button3" type="Button" parent="."]
+offset_left = 672.0
+offset_top = 288.0
+offset_right = 800.0
+offset_bottom = 352.0
+toggle_mode = true
+text = "upper"
+
+[connection signal="toggled" from="Button" to="." method="_on_button_toggled"]
+[connection signal="toggled" from="Button2" to="." method="_on_button_2_toggled"]
+[connection signal="toggled" from="Button3" to="." method="_on_button_3_toggled"]

@@ -1,0 +1,62 @@
+[gd_scene load_steps=3 format=3 uid="uid://fgx3msmlceof"]
+
+[ext_resource type="Script" path="res://scripts/clock.gd" id="1_sbrrq"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fvhqq"]
+
+[node name="Clock" type="Panel"]
+custom_minimum_size = Vector2(256, 256)
+offset_right = 256.0
+offset_bottom = 256.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_fvhqq")
+script = ExtResource("1_sbrrq")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 4.5
+offset_right = -8.0
+offset_bottom = -3.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Control" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+
+[node name="Time" type="SpinBox" parent="VBox/Control"]
+layout_mode = 2
+max_value = 10000.0
+step = 0.01
+value = 1.0
+alignment = 1
+select_all_on_focus = true
+
+[node name="AddConnection" type="Button" parent="VBox/Control"]
+custom_minimum_size = Vector2(32, 0)
+layout_mode = 2
+text = "+"
+
+[node name="Start" type="Button" parent="VBox/Control"]
+layout_mode = 2
+text = "Start"
+
+[node name="Label" type="Label" parent="VBox/Control"]
+layout_mode = 2
+text = "0"
+
+[node name="Connected" type="ScrollContainer" parent="VBox"]
+custom_minimum_size = Vector2(0, 212)
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="VBox/Connected"]
+layout_mode = 2
+
+[node name="Time" type="Timer" parent="."]
+one_shot = true
+
+[connection signal="pressed" from="VBox/Control/AddConnection" to="." method="_on_add_connection_pressed"]
+[connection signal="pressed" from="VBox/Control/Start" to="." method="start"]
+[connection signal="child_order_changed" from="VBox/Connected/VBox" to="." method="_on_v_box_child_order_changed"]
