@@ -1,42 +1,231 @@
-[gd_scene load_steps=3 format=3 uid="uid://dqs83jfyuvrkd"]
+[gd_scene load_steps=11 format=3 uid="uid://dqs83jfyuvrkd"]
 
 [ext_resource type="PackedScene" uid="uid://fgx3msmlceof" path="res://scenes/clock.tscn" id="1_15c5l"]
 [ext_resource type="Script" path="res://scripts/test.gd" id="1_miv5m"]
+[ext_resource type="Texture2D" uid="uid://n0cwu0loiivg" path="res://icon.svg" id="3_dq7ln"]
+
+[sub_resource type="Animation" id="Animation_ijic6"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(1, 1)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath(".:skew")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath(".:offset")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_ys4y3"]
+resource_name = "offset"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:offset")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.5, 1),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(0, 0), Vector2(-128, 0), Vector2(0, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_23dxd"]
+resource_name = "rotate"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.0, 6.28319]
+}
+
+[sub_resource type="Animation" id="Animation_00yp5"]
+resource_name = "rotateskew"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.0, 6.28319]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:skew")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.5, 1),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [0.0, -1.56905, 0.0]
+}
+
+[sub_resource type="Animation" id="Animation_gpwfs"]
+resource_name = "scale"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.5, 1),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(1, 1), Vector2(2, 2), Vector2(1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_wxqcb"]
+resource_name = "skew"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:skew")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.5, 1),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [0.0, -1.56905, 0.0]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_qwls0"]
+_data = {
+"RESET": SubResource("Animation_ijic6"),
+"offset": SubResource("Animation_ys4y3"),
+"rotate": SubResource("Animation_23dxd"),
+"rotateskew": SubResource("Animation_00yp5"),
+"scale": SubResource("Animation_gpwfs"),
+"skew": SubResource("Animation_wxqcb")
+}
 
 [node name="Test" type="Node2D"]
 scale = Vector2(2, 2)
 script = ExtResource("1_miv5m")
 
 [node name="Clock" parent="." instance=ExtResource("1_15c5l")]
-offset_left = 64.0
-offset_top = 64.0
-offset_right = 512.0
-offset_bottom = 608.0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 800.0
+offset_bottom = 144.0
+
+[node name="Clock2" parent="." instance=ExtResource("1_15c5l")]
+offset_left = 16.0
+offset_top = 160.0
+offset_right = 448.0
+offset_bottom = 384.0
+
+[node name="Clock3" parent="." instance=ExtResource("1_15c5l")]
+offset_left = 464.0
+offset_top = 160.0
+offset_right = 896.0
+offset_bottom = 512.0
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(880, 80)
+texture = ExtResource("3_dq7ln")
+
+[node name="Animation" type="AnimationPlayer" parent="Sprite2D"]
+libraries = {
+"": SubResource("AnimationLibrary_qwls0")
+}
+
+[node name="Sprite2D2" type="Sprite2D" parent="."]
+position = Vector2(384, 464)
+texture = ExtResource("3_dq7ln")
+
+[node name="Animation" type="AnimationPlayer" parent="Sprite2D2"]
+libraries = {
+"": SubResource("AnimationLibrary_qwls0")
+}
+
+[node name="Sprite2D3" type="Sprite2D" parent="."]
+position = Vector2(448, 400)
+texture = ExtResource("3_dq7ln")
 
 [node name="Button" type="Button" parent="."]
-offset_left = 672.0
-offset_top = 64.0
-offset_right = 800.0
-offset_bottom = 128.0
-toggle_mode = true
-text = "no number"
+offset_left = 560.0
+offset_top = 32.0
+offset_right = 773.0
+offset_bottom = 63.0
+text = "PROPAGATE ALWAYS TRUE"
 
 [node name="Button2" type="Button" parent="."]
-offset_left = 736.0
-offset_top = 160.0
-offset_right = 911.0
-offset_bottom = 224.0
-toggle_mode = true
-text = "no number and lower"
+offset_left = 368.0
+offset_top = 336.0
+offset_right = 537.0
+offset_bottom = 367.0
+text = "PROPAGATE UNIQUE"
 
-[node name="Button3" type="Button" parent="."]
-offset_left = 672.0
-offset_top = 288.0
-offset_right = 800.0
-offset_bottom = 352.0
-toggle_mode = true
-text = "upper"
+[node name="Label" type="Label" parent="."]
+offset_left = 160.0
+offset_top = 432.0
+offset_right = 200.0
+offset_bottom = 455.0
+text = "0"
 
-[connection signal="toggled" from="Button" to="." method="_on_button_toggled"]
-[connection signal="toggled" from="Button2" to="." method="_on_button_2_toggled"]
-[connection signal="toggled" from="Button3" to="." method="_on_button_3_toggled"]
+[node name="Timer" type="Timer" parent="."]
+wait_time = 60.0
+
+[connection signal="alarm_created" from="Clock" to="." method="_on_clock_alarm_created"]
+[connection signal="event_created" from="Clock" to="." method="_on_clock_event_created"]
+[connection signal="alarm_created" from="Clock2" to="." method="_on_clock_2_alarm_created"]
+[connection signal="event_created" from="Clock2" to="." method="_on_clock_2_event_created"]
+[connection signal="alarm" from="Clock3" to="." method="_on_clock_3_alarm"]
+[connection signal="event_created" from="Clock3" to="." method="_on_clock_3_event_created"]
+[connection signal="started" from="Clock3" to="." method="_on_clock_3_started"]
+[connection signal="pressed" from="Button" to="." method="_on_button_always_true_pressed"]
+[connection signal="pressed" from="Button2" to="." method="_on_button_propagate_unique_pressed"]
