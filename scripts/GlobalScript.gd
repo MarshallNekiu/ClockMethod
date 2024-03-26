@@ -6,7 +6,7 @@ const SCRIPT = preload("res://scripts/GlobalScript.gd")#
 ########################################################
 
 static func get_Debugger(requester: Node) -> TextEdit:
-	requester = requester.get_tree().root.get_child(0)
+	#requester = requester.get_tree().root.get_child(0)
 	
 	if requester.has_node("Debugger"):
 		return requester.get_node("Debugger/TextEdit")
