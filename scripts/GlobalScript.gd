@@ -11,7 +11,7 @@ static func get_Debugger(requester: Node) -> TextEdit:
 	
 	var window := Window.new()
 	window.name = "Debugger"
-	window.size = requester.get_viewport_rect().size
+	window.size = requester.get_viewport_rect().size * 0.5
 	window.initial_position = Window.WINDOW_INITIAL_POSITION_CENTER_MAIN_WINDOW_SCREEN
 	requester.add_child(window, true, Node.INTERNAL_MODE_BACK)
 	window.connect("close_requested", func (): window.queue_free())
