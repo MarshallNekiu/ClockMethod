@@ -1,47 +1,41 @@
+##Clock.
 class_name Clock
 extends Panel
 
-signal started
 signal alarm(time: float)
+signal stopped(time: float)
+signal finished
 signal alarm_created(alarm: Alarm)
 signal event_created(event: Alarm.Event)
 
+
+##BlackBox.
 class BlackBox:
+	
+	##Emits the return of [code]run()[/code].
 	signal state_toggled(state: bool)
 	
 	var input: Callable
 	var output: Callable
-	var propagation: Callable
 	
-	
+	##Verify the return of [code]input[/code] and emit it at [code]state_toggle[/code].
+	##In case of input returned [code]true[/code] or input is [code]null[/code], the [code]output[/code] is called if setted.
 	func run():
 		if input:
-			if await input.call():
+			if not await input.call():
+				state_toggled.emit(false)
+				return
+			else:
 				state_toggled.emit(true)
-				if output:
-					output.call()
-					return
-		state_toggled.emit(false)
-	
-	
-	func propagate_input(new_input := input):
-		if propagation:
-			var propagated:Array = propagation.call().map(func (x): return x.black_box)
-			for i in propagated:
-				i.propagate_input(new_input)
-				i.input = new_input
-	
-	
-	func propagate_output(new_output := output):
-		if propagation:
-			var propagated:Array = propagation.call().map(func (x): return x.black_box)
-			for i in propagated as Array[BlackBox]:
-				i.propagate_output(new_output)
-				i.output = new_output
+		if output:
+			output.call()
 
+
+##Alarm.
 class Alarm:
 	extends HBoxContainer
 	
+	##Event.
 	class Event:
 		extends Button
 		
@@ -52,22 +46,29 @@ class Alarm:
 			name = "Event"
 		
 		
-		func ready():
+		func _ready():
 			if text == "":
 				text = name
-			(owner as Clock).emit_signal("alarm_created", self)
 	
 	
 	var black_box := BlackBox.new()
+	var label := "!":
+		set(x):
+			get_node("Label").set_text(x)
+		get:
+			return get_node("Label").get_text()
+	var time := 1.0:
+		set(x):
+			get_node("Time").set_value(x)
+		get:
+			return get_node("Time").get_value()
 	
 	
-	func _init(label := "!"):
-		black_box.propagation = get_event_list
+	func _init():
 		name = "Alarm"
 		
 		var new_label := Button.new()
 		new_label.name = "Label"
-		new_label.text = label
 		new_label.custom_minimum_size.x = 32
 		
 		var new_time := SpinBox.new()
@@ -76,38 +77,32 @@ class Alarm:
 		new_time.select_all_on_focus = true
 		new_time.max_value = 600
 		new_time.step = 0.01
-		new_time.value = 1.0
 		
 		var new_add_event := LineEdit.new()
 		new_add_event.name = "AddEvent"
 		new_add_event.placeholder_text = "Event"
 		new_add_event.expand_to_text_length = true
 		
-		add_child(new_label)
-		add_child(new_time)
-		add_child(new_add_event)
+		add_child(new_label, true, Node.INTERNAL_MODE_FRONT)
+		add_child(new_time, true, Node.INTERNAL_MODE_FRONT)
+		add_child(new_add_event, true, Node.INTERNAL_MODE_BACK)
 		
 		new_label.connect("button_down", _on_button_down.bind(new_label, self))
 		new_add_event.connect("text_submitted", add_event)
 	
 	
-	func add_event(event_text: String):
-		if not get_children().filter(func (x): return x.is_in_group("Event") and x.text == event_text).is_empty():
-			return
+	func add_event(event_text := ""):
 		var new_event := Event.new()
-		new_event.text = event_text
+		new_event.text = event_text if not event_text == "" else "Event"
 		new_event.add_to_group("Event")
-		if black_box.input:
-			new_event.black_box.input = black_box.input
-		if black_box.output:
-			new_event.black_box.output = black_box.output
+		
 		add_child(new_event, true)
-		move_child(new_event, -2)
-		new_event.owner = owner as Clock
-		owner.emit_signal("event_created", new_event)
+		new_event.owner = self
 		
 		new_event.connect("button_down", _on_button_down.bind(new_event))
-		new_event.black_box.connect("state_toggled", Callable(func (toggle: bool): new_event.modulate = Color.WHITE if toggle else Color.RED))
+		new_event.black_box.connect("state_toggled", func (toggle: bool): new_event.modulate = Color.WHITE if new_event.modulate == Color.RED and toggle else Color.RED if not toggle and new_event.modulate == Color.WHITE else new_event.modulate)
+		
+		owner.emit_signal("event_created", new_event)
 	
 	
 	func get_event_list() -> Array[Event]:
@@ -117,11 +112,10 @@ class Alarm:
 	
 	
 	func _on_button_down(button: Button, modulated = button, freed = modulated):
-		var time := button.get_tree().create_timer(0.3)
+		await button.get_tree().create_timer(0.3)
 		if is_instance_valid(button) and button.is_pressed():
-			modulated.modulate = Color.WHITE if modulated.modulate == Color.DIM_GRAY else Color.DIM_GRAY
-		else:
-			return
+			modulated.modulate = Color.WHITE if modulated.modulate == Color.DIM_GRAY else Color.DIM_GRAY if modulated.modulate == Color.WHITE else modulated.modulate
+		else: return
 		
 		await button.get_tree().create_timer(0.5).timeout
 		if is_instance_valid(button) and button.is_pressed():
@@ -129,84 +123,73 @@ class Alarm:
 
 
 var black_box := BlackBox.new()
-
-
-func _ready():
-	black_box.propagation = $VBox/Connected/VBox.get_children
+var current_time:float = 0:
+	set(x):
+		$VBox/Control/CurrentTime/Animation.track_set_key_value(0, 0, x)
+	get:
+		return $VBox/Control/CurrentTime/Animation.track_get_key_value(0, 0)
+var end_time := 1.0:
+	set(x):
+		$VBox/Control/EndTime.set_value(x)
+	get:
+		return $VBox/Control/EndTime.get_value()
 
 
 func add_alarm(label := ""):
-	var new_alarm := Alarm.new(label)
-	
-	new_alarm.get_node("Time").value = $VBox/Control/Time.value
-	new_alarm.get_node("Label").text = label if not label == "" else "!"
-	if black_box.input:
-		new_alarm.black_box.input = black_box.input
-	if black_box.output:
-		new_alarm.black_box.output = black_box.output
+	var new_alarm := Alarm.new()
+	new_alarm.label = label if not label == "" else "!"
 	new_alarm.add_to_group("Alarm")
 	
-	$VBox/Connected/VBox.add_child(new_alarm, true)
+	$VBox/AlarmContainer/VBox.add_child(new_alarm, true)
 	new_alarm.owner = self
+	
 	emit_signal("alarm_created", new_alarm)
 
 
-func get_alarm_list() -> Dictionary:
-	var list: Dictionary
-	
-	for i in $VBox/Connected/VBox.get_children():
-		list.merge({i: [i.get_node("Label").text, i.get_node("Time").value]})
-	
+func get_alarm_list() -> Array[Alarm]:
+	var list: Array[Alarm]
+	list.append_array($VBox/AlarmContainer/VBox.get_children().filter(func (x): return x.is_in_group("Alarm")))
 	return list
 
 
 func sort_by_time():
-	var node_list := $VBox/Connected/VBox.get_children()
-	node_list.sort_custom(func (a:Alarm, b:Alarm): return a.get_node("Time").value < b.get_node("Time").value)
-	
-	for i in node_list:
-		$VBox/Connected/VBox.move_child(i, -1)
+	var list := get_alarm_list()
+	list.sort_custom(func (a, b): return a.time < b.time)
+	for i in list:
+		$VBox/AlarmContainer/VBox.move_child(i, -1)
 
 
 func start():
-	var time_end:float = $VBox/Control/EndTime.value
 	var alarm_list := get_alarm_list()
 	var event_list: Dictionary
-
 	var time_list := [0]
-	for i in alarm_list.keys().filter(func (x: Alarm): return x.modulate == Color.WHITE) as Array[Alarm]:
-		if not time_list.has(alarm_list[i][1]):
-			time_list.append(alarm_list[i][1])
-			event_list.merge({alarm_list[i][1]: []})
-		
-		for j in [i] + i.get_event_list().filter(func (x: Alarm.Event): return not x.modulate == Color.DIM_GRAY) as Array[Alarm]:
-			if j.black_box:
-				event_list[alarm_list[i][1]].append(j.black_box)
+	
+	for i in alarm_list.filter(func (x): return x.modulate == Color.WHITE):
+		if not time_list.has(i.time):
+			time_list.append(i.time)
+			event_list.merge({i.time: []})
+			
+		for j in [i] + i.get_event_list().filter(func (x): return not x.modulate == Color.DIM_GRAY):
+			event_list[i.time].append(j.black_box)
 	time_list.sort()
-
-	var _time := $VBox/Control/CurrentTime/Animation as AnimationPlayer
-	var animation := _time.get_animation("start")
-	_time.stop()
-	emit_signal("started")
+	
+	var animator := $VBox/Control/CurrentTime/Animation as AnimationPlayer
+	var animation := animator.get_animation("start")
+	animator.stop()
+	
 	for i in range(1, time_list.size()):
 		animation.length = time_list[i]
-		if animation.length > time_end:
-			GlobalScript.get_Debugger(self).text += "\nStopped\n"
+		if time_list[i] > end_time:
+			emit_signal("stopped", time_list[i - 1])
 			return
-		animation.track_set_key_value(0, 1, time_list[i])
-		animation.track_set_key_time(0, 1, time_list[i])
-		_time.play("start")
-		await _time.animation_finished
+		animation.track_set_key_value(0, 1, animation.length)
+		animation.track_set_key_time(0, 1, animation.length)
+		animator.play("start")
+		await animator.animation_finished
+		emit_signal("alarm", time_list[i])
 		for j in event_list[time_list[i]] as Array[BlackBox]:
 			j.run()
-		emit_signal("alarm", time_list[i])
-	GlobalScript.get_Debugger(self).text += "\nFinished\n"
-
-
-
-
-
-
+	emit_signal("finished")
 
 
 
